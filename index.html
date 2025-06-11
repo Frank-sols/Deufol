@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,13 +36,38 @@
         button:hover {
             background-color: #0056b3;
         }
+        #status {
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.95em;
+        }
     </style>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAu4o60223u-EchbZGY_FL4pEoHxduNW04",
+        authDomain: "deuf-realtime.firebaseapp.com",
+        databaseURL: "https://deuf-realtime-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "deuf-realtime",
+        storageBucket: "deuf-realtime.appspot.com",
+        messagingSenderId: "78447778881",
+        appId: "1:78447778881:web:7598124dd5b04cf838828",
+        measurementId: "G-YR1XSS7K7"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const dbRef = firebase.database().ref('lastResetDate');
+    </script>
 </head>
 <body>
     <h1>Days Since Last Accident</h1>
     <div id="counter">0</div>
     <button onclick="resetCounter()">Reset</button>
-
+    <div id="status"></div>
     <script>
         function getDaysSince(date) {
             const oneDay = 24 * 60 * 60 * 1000;
@@ -52,24 +76,36 @@
             return Math.floor((now - lastReset) / oneDay);
         }
 
-        function updateCounter() {
-            const lastResetDate = localStorage.getItem('lastResetDate');
-            if (lastResetDate) {
-                const daysSince = getDaysSince(lastResetDate);
+        function updateCounter(date) {
+            if (date) {
+                const daysSince = getDaysSince(date);
                 document.getElementById('counter').innerText = daysSince;
             } else {
                 document.getElementById('counter').innerText = 0;
             }
         }
 
-        function resetCounter() {
-            const now = new Date();
-            localStorage.setItem('lastResetDate', now.toISOString());
-            updateCounter();
-        }
+        // Listen for changes in the database
+        dbRef.on('value', (snapshot) => {
+            const lastResetDate = snapshot.val();
+            updateCounter(lastResetDate);
+            document.getElementById('status').innerText = '';
+        }, (error) => {
+            document.getElementById('status').innerText = 'Error reading from database.';
+        });
 
-        // Update the counter on page load
-        updateCounter();
+        function resetCounter() {
+            if (confirm('Are you sure you want to reset the counter? This will reset it for everyone.')) {
+                const now = new Date().toISOString();
+                dbRef.set(now)
+                    .then(() => {
+                        document.getElementById('status').innerText = 'Counter reset successfully!';
+                    })
+                    .catch((error) => {
+                        document.getElementById('status').innerText = 'Error resetting counter.';
+                    });
+            }
+        }
     </script>
 </body>
 </html>
