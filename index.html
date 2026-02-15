@@ -42,12 +42,12 @@
             font-size: 0.95em;
         }
     </style>
-    <!-- Firebase App (the core Firebase SDK) -->
+
+    <!-- Firebase App -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <!-- Firebase Database -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-      // Your web app's Firebase configuration
       var firebaseConfig = {
         apiKey: "AIzaSyAu4o60223u-EchbZGY_FL4pEoHxduNW04",
         authDomain: "deuf-realtime.firebaseapp.com",
@@ -58,7 +58,7 @@
         appId: "1:78447778881:web:7598124dd5b04cf838828",
         measurementId: "G-YR1XSS7K7"
       };
-      // Initialize Firebase
+
       firebase.initializeApp(firebaseConfig);
       const dbRef = firebase.database().ref('lastResetDate');
     </script>
@@ -68,6 +68,7 @@
     <div id="counter">0</div>
     <button onclick="resetCounter()">Reset</button>
     <div id="status"></div>
+
     <script>
         function getDaysSince(date) {
             const oneDay = 24 * 60 * 60 * 1000;
@@ -85,7 +86,6 @@
             }
         }
 
-        // Listen for changes in the database
         dbRef.on('value', (snapshot) => {
             const lastResetDate = snapshot.val();
             updateCounter(lastResetDate);
@@ -105,6 +105,14 @@
                         document.getElementById('status').innerText = 'Error resetting counter.';
                     });
             }
+        }
+
+        // AUTO-RETURN TO DISPLAY
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("return")) {
+            setTimeout(() => {
+                window.location.href = "display.html";
+            }, 15000);
         }
     </script>
 </body>
