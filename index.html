@@ -107,11 +107,12 @@
             }
         }
 
-        // AUTO-RETURN TO DISPLAY
+        // AUTO-RETURN TO DISPLAY WITH POSITION MEMORY
         const params = new URLSearchParams(window.location.search);
         if (params.get("return")) {
+            const nextIndex = params.get("i") || 0;
             setTimeout(() => {
-                window.location.href = "display.html";
+                window.location.href = "display.html?i=" + nextIndex;
             }, 15000);
         }
     </script>
