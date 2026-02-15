@@ -41,31 +41,33 @@ const slides = [];
 for (let i = 1; i <= 12; i++) {
   slides.push(`slides/ppt1/Slide${i}.PNG`);
 }
-
 slides.push("COUNTER");
 
 // ppt2 slides (13)
 for (let i = 1; i <= 13; i++) {
   slides.push(`slides/ppt2/Slide${i}.PNG`);
 }
-
 slides.push("COUNTER");
 
 // ppt3 slides (2)
 for (let i = 1; i <= 2; i++) {
   slides.push(`slides/ppt3/Slide${i}.png`);
 }
-
 slides.push("COUNTER");
 
-let index = 0;
+// get index from URL
+const params = new URLSearchParams(window.location.search);
+let index = parseInt(params.get("i")) || 0;
+
 const viewer = document.getElementById("viewer");
 
 function showNext() {
   const item = slides[index];
 
   if (item === "COUNTER") {
-    window.location.href = counterURL + "?return=1";
+    // go to counter and remember next position
+    const nextIndex = (index + 1) % slides.length;
+    window.location.href = `${counterURL}?return=1&i=${nextIndex}`;
     return;
   } else {
     viewer.innerHTML = `<img src="${item}">`;
@@ -76,14 +78,7 @@ function showNext() {
   }
 }
 
-const params = new URLSearchParams(window.location.search);
-if (params.get("return")) {
-  setTimeout(() => {
-    window.location.href = "display.html";
-  }, counterTime);
-} else {
-  showNext();
-}
+showNext();
 </script>
 
 </body>
