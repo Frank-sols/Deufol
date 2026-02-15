@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Warehouse Display</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: black;
+  }
+  img, iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="viewer"></div>
+
+<script>
+const counterURL = "https://frank-sols.github.io/Deufol/";
+
+const slides = [];
+
+// Counter first
+slides.push({ type: "counter", url: counterURL, time: 15000 });
+
+// ppt1 slides (12 slides)
+for (let i = 1; i <= 12; i++) {
+  slides.push({
+    type: "image",
+    url: `slides/ppt1/Slide${i}.PNG`,
+    time: 8000
+  });
+}
+
+// Counter again
+slides.push({ type: "counter", url: counterURL, time: 15000 });
+
+// ppt2 slides (13 slides)
+for (let i = 1; i <= 13; i++) {
+  slides.push({
+    type: "image",
+    url: `slides/ppt2/Slide${i}.PNG`,
+    time: 8000
+  });
+}
+
+// Counter again
+slides.push({ type: "counter", url: counterURL, time: 15000 });
+
+// ppt3 slides (2 slides)
+for (let i = 1; i <= 2; i++) {
+  slides.push({
+    type: "image",
+    url: `slides/ppt3/Slide${i}.png`,
+    time: 10000
+  });
+}
+
+let index = 0;
+const viewer = document.getElementById("viewer");
+
+function showNext() {
+  const slide = slides[index];
+
+  if (slide.type === "counter") {
+    viewer.innerHTML = `<iframe src="${slide.url}"></iframe>`;
+  } else {
+    viewer.innerHTML = `<img src="${slide.url}">`;
+  }
+
+  setTimeout(() => {
+    index = (index + 1) % slides.length;
+    showNext();
+  }, slide.time);
+}
+
+showNext();
+</script>
+
+</body>
+</html>
