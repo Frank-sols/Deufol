@@ -1,103 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Warehouse Display</title>
-
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    background: black;
-    overflow: hidden;
-  }
-
-  #viewer {
-    width: 100vw;
-    height: 100vh;
-  }
-
-  img {
-    width: 100vw;
-    height: 100vh;
-    object-fit: contain;
-    border: none;
-  }
-
-  iframe {
-    width: 100vw;
-    height: 100vh;
-    border: none;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Days Since Last Accident</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        h1 {
+            font-size: 3em;
+            color: #333;
+        }
+        #counter {
+            font-size: 5em;
+            color: #007bff;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #status {
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.95em;
+        }
+    </style>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAu4o60223u-EchbZGY_FL4pEoHxduNW04",
+        authDomain: "deuf-realtime.firebaseapp.com",
+        databaseURL: "https://deuf-realtime-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "deuf-realtime",
+        storageBucket: "deuf-realtime.appspot.com",
+        messagingSenderId: "78447778881",
+        appId: "1:78447778881:web:7598124dd5b04cf838828",
+        measurementId: "G-YR1XSS7K7"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const dbRef = firebase.database().ref('lastResetDate');
+    </script>
 </head>
 <body>
+    <h1>Days Since Last Accident</h1>
+    <div id="counter">0</div>
+    <button onclick="resetCounter()">Reset</button>
+    <div id="status"></div>
+    <script>
+        function getDaysSince(date) {
+            const oneDay = 24 * 60 * 60 * 1000;
+            const now = new Date();
+            const lastReset = new Date(date);
+            return Math.floor((now - lastReset) / oneDay);
+        }
 
-<div id="viewer"></div>
+        function updateCounter(date) {
+            if (date) {
+                const daysSince = getDaysSince(date);
+                document.getElementById('counter').innerText = daysSince;
+            } else {
+                document.getElementById('counter').innerText = 0;
+            }
+        }
 
-<script>
-const counterURL = "https://frank-sols.github.io/Deufol/";
+        // Listen for changes in the database
+        dbRef.on('value', (snapshot) => {
+            const lastResetDate = snapshot.val();
+            updateCounter(lastResetDate);
+            document.getElementById('status').innerText = '';
+        }, (error) => {
+            document.getElementById('status').innerText = 'Error reading from database.';
+        });
 
-const slides = [];
-
-// Counter first
-slides.push({ type: "counter", url: counterURL, time: 15000 });
-
-// ppt1 slides (12 slides)
-for (let i = 1; i <= 12; i++) {
-  slides.push({
-    type: "image",
-    url: `slides/ppt1/Slide${i}.PNG`,
-    time: 8000
-  });
-}
-
-// Counter again
-slides.push({ type: "counter", url: counterURL, time: 15000 });
-
-// ppt2 slides (13 slides)
-for (let i = 1; i <= 13; i++) {
-  slides.push({
-    type: "image",
-    url: `slides/ppt2/Slide${i}.PNG`,
-    time: 8000
-  });
-}
-
-// Counter again
-slides.push({ type: "counter", url: counterURL, time: 15000 });
-
-// ppt3 slides (2 slides)
-for (let i = 1; i <= 2; i++) {
-  slides.push({
-    type: "image",
-    url: `slides/ppt3/Slide${i}.png`,
-    time: 10000
-  });
-}
-
-let index = 0;
-const viewer = document.getElementById("viewer");
-
-function showNext() {
-  const slide = slides[index];
-
-  if (slide.type === "counter") {
-    viewer.innerHTML = `<iframe src="${slide.url}"></iframe>`;
-  } else {
-    viewer.innerHTML = `<img src="${slide.url}">`;
-  }
-
-  setTimeout(() => {
-    index = (index + 1) % slides.length;
-    showNext();
-  }, slide.time);
-}
-
-showNext();
-</script>
-
+        function resetCounter() {
+            if (confirm('Are you sure you want to reset the counter? This will reset it for everyone.')) {
+                const now = new Date().toISOString();
+                dbRef.set(now)
+                    .then(() => {
+                        document.getElementById('status').innerText = 'Counter reset successfully!';
+                    })
+                    .catch((error) => {
+                        document.getElementById('status').innerText = 'Error resetting counter.';
+                    });
+            }
+        }
+    </script>
 </body>
 </html>
