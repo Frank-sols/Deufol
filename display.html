@@ -1,84 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Warehouse Display</title>
 
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    background: black;
-    overflow: hidden;
-  }
+html,body{
+margin:0;
+padding:0;
+background:black;
+height:100%;
+width:100%;
+overflow:hidden;
+}
 
-  #viewer {
-    width: 100vw;
-    height: 100vh;
-  }
+#viewer{
+width:100vw;
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+}
 
-  img {
-    width: 100vw;
-    height: 100vh;
-    object-fit: contain;
-    border: none;
-  }
+img,iframe{
+width:100%;
+height:100%;
+object-fit:contain;
+border:none;
+background:black;
+}
 </style>
 </head>
+
 <body>
 
 <div id="viewer"></div>
 
 <script>
-const counterURL = "index.html";
-const counterTime = 15000;
 
-const slides = [];
+// --------------------
+// SETTINGS
+// --------------------
 
-// ppt1 slides (12)
-for (let i = 1; i <= 12; i++) {
-  slides.push(`slides/ppt1/Slide${i}.PNG`);
+const slideTime = 10000; // 10 seconds
+const counterURL = "https://frank-sols.github.io/Deufol/";
+
+// --------------------
+// BUILD PLAYLIST
+// --------------------
+
+const playlist = [];
+
+// PPT1 (12 slides)
+for(let i=1;i<=12;i++){
+playlist.push({type:"image",src:`slides/ppt1/Slide${i}.PNG`});
 }
-slides.push("COUNTER");
 
-// ppt2 slides (13)
-for (let i = 1; i <= 13; i++) {
-  slides.push(`slides/ppt2/Slide${i}.PNG`);
+// Counter
+playlist.push({type:"counter",src:counterURL});
+
+// PPT2 (13 slides)
+for(let i=1;i<=13;i++){
+playlist.push({type:"image",src:`slides/ppt2/Slide${i}.PNG`});
 }
-slides.push("COUNTER");
 
-// ppt3 slides (2)
-for (let i = 1; i <= 2; i++) {
-  slides.push(`slides/ppt3/Slide${i}.png`);
+// Counter
+playlist.push({type:"counter",src:counterURL});
+
+// PPT3 (2 slides)
+for(let i=1;i<=2;i++){
+playlist.push({type:"image",src:`slides/ppt3/Slide${i}.png`});
 }
-slides.push("COUNTER");
 
-// get index from URL
-const params = new URLSearchParams(window.location.search);
-let index = parseInt(params.get("i")) || 0;
+// Counter
+playlist.push({type:"counter",src:counterURL});
 
+// --------------------
+// PLAYER
+// --------------------
+
+let index = 0;
 const viewer = document.getElementById("viewer");
 
-function showNext() {
-  const item = slides[index];
+function showSlide(){
 
-  if (item === "COUNTER") {
-    // go to counter and remember next position
-    const nextIndex = (index + 1) % slides.length;
-    window.location.href = `${counterURL}?return=1&i=${nextIndex}`;
-    return;
-  } else {
-    viewer.innerHTML = `<img src="${item}">`;
-    setTimeout(() => {
-      index = (index + 1) % slides.length;
-      showNext();
-    }, 10000);
-  }
+viewer.innerHTML = "";
+
+let item = playlist[index];
+
+if(item.type === "image"){
+
+let img = document.createElement("img");
+img.src = item.src + "?v=" + Date.now(); // avoid cache
+viewer.appendChild(img);
+
 }
 
-showNext();
+if(item.type === "counter"){
+
+let iframe = document.createElement("iframe");
+iframe.src = item.src;
+viewer.appendChild(iframe);
+
+}
+
+// next slide
+index++;
+
+if(index >= playlist.length){
+index = 0;
+}
+
+setTimeout(showSlide, slideTime);
+
+}
+
+// start player
+showSlide();
+
+
+// --------------------
+// SELF HEAL (important for TVs)
+// --------------------
+
+// reload every hour
+setTimeout(()=>{
+location.reload();
+},3600000);
+
+
+// watchdog if script freezes
+setInterval(()=>{
+if(!document.hidden){
+console.log("watchdog alive");
+}
+},30000);
+
 </script>
 
 </body>
